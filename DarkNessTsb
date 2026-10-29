@@ -1,0 +1,411 @@
+-- Pearl×Neøn Studio | DarkNess Library Extended Build
+-- Theme: Neon Aqua & Dark Obsidian | Saturn Hub Edition
+-- Updated: Draggable Menu, Extra Wide Layout, Advanced Neon Aqua ESP Suite
+
+local DarkNessLibrary = {}
+DarkNessLibrary.__index = DarkNessLibrary
+
+-- Renk Konfigürasyonları
+local NeonAqua = Color3.fromRGB(0, 255, 220)
+local DarkObsidian = Color3.fromRGB(15, 15, 20)
+local HeaderGray = Color3.fromRGB(20, 25, 35)
+local ElementGray = Color3.fromRGB(25, 25, 35)
+local ElementGrayHover = Color3.fromRGB(25, 45, 55)
+local TextGray = Color3.fromRGB(200, 200, 200)
+
+function DarkNessLibrary.new(titleText)
+    local self = setmetatable({}, DarkNessLibrary)
+    
+    if game:GetService("CoreGui"):FindFirstChild("SaturnHub") then
+        game:GetService("CoreGui").SaturnHub:Destroy()
+    end
+    
+    local protect = function(gui)
+        if syn and syn.protect_gui then
+            syn.protect_gui(gui)
+            gui.Parent = game:GetService("CoreGui")
+        elseif gethui then
+            gui.Parent = gethui()
+        else
+            gui.Parent = game:GetService("CoreGui")
+        end
+    end
+
+    self.ScreenGui = Instance.new("ScreenGui")
+    self.ScreenGui.Name = "SaturnHub"
+    self.ScreenGui.ResetOnSpawn = false
+    self.ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    protect(self.ScreenGui)
+
+    -- Menü Boyutları Daha Da Genişletildi (İstek üzerine)
+    self.MainFrame = Instance.new("Frame")
+    self.MainFrame.Name = "MainFrame"
+    self.MainFrame.Size = UDim2.new(0, 720, 0, 480) -- Daha geniş Doğu-Batı ve Boy
+    self.MainFrame.Position = UDim2.new(0.5, -360, 0.5, -240)
+    self.MainFrame.BackgroundColor3 = DarkObsidian
+    self.MainFrame.BorderSizePixel = 0
+    self.MainFrame.Parent = self.ScreenGui
+
+    self.Stroke = Instance.new("UIStroke")
+    self.Stroke.Color = NeonAqua
+    self.Stroke.Thickness = 1.5
+    self.Stroke.Parent = self.MainFrame
+
+    self.Corner = Instance.new("UICorner")
+    self.Corner.CornerRadius = UDim.new(0, 8)
+    self.Corner.Parent = self.MainFrame
+
+    -- Başlık Barı (Undetected ibaresi ve Draggable)
+    self.Header = Instance.new("TextLabel")
+    self.Header.Size = UDim2.new(1, 0, 0, 45)
+    self.Header.BackgroundColor3 = HeaderGray
+    self.Header.BorderSizePixel = 0
+    self.Header.Text = "  " .. titleText .. " | Saturn Hub [Undetected 🛡️]"
+    self.Header.TextColor3 = NeonAqua
+    self.Header.TextSize = 15
+    self.Header.Font = Enum.Font.GothamBold
+    self.Header.TextXAlignment = Enum.TextXAlignment.Left
+    self.Header.Parent = self.MainFrame
+
+    local HeaderCorner = Instance.new("UICorner")
+    HeaderCorner.CornerRadius = UDim.new(0, 8)
+    HeaderCorner.Parent = self.Header
+
+    -- Menüyü Sürükleme Mantığı (Draggable)
+    local UserInputService = game:GetService("UserInputService")
+    local dragging, dragInput, dragStart, startPos
+
+    self.Header.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+            dragStart = input.Position
+            startPos = self.MainFrame.Position
+            
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    dragging = false
+                end
+            end)
+        end
+    end)
+
+    self.Header.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+            dragInput = input
+        end
+    end)
+
+    UserInputService.InputChanged:Connect(function(input)
+        if input == dragInput and dragging then
+            local delta = input.Position - dragStart
+            self.MainFrame.Position = UDim2.new(
+                startPos.X.Scale, 
+                startPos.X.Offset + delta.X, 
+                startPos.Y.Scale, 
+                startPos.Y.Offset + delta.Y
+            )
+        end
+    end)
+
+    -- Sekme Listesi (Sol)
+    self.TabListFrame = Instance.new("ScrollingFrame")
+    self.TabListFrame.Size = UDim2.new(0, 160, 1, -55)
+    self.TabListFrame.Position = UDim2.new(0, 8, 0, 48)
+    self.TabListFrame.BackgroundTransparency = 1
+    self.TabListFrame.BorderSizePixel = 0
+    self.TabListFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+    self.TabListFrame.ScrollBarThickness = 2
+    self.TabListFrame.Parent = self.MainFrame
+
+    self.TabLayout = Instance.new("UIListLayout")
+    self.TabLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    self.TabLayout.Padding = UDim.new(0, 6)
+    self.TabLayout.Parent = self.TabListFrame
+
+    -- İçerik Alanı (Sağ)
+    self.ContentArea = Instance.new("Frame")
+    self.ContentArea.Size = UDim2.new(1, -180, 1, -55)
+    self.ContentArea.Position = UDim2.new(0, 172, 0, 48)
+    self.ContentArea.BackgroundTransparency = 1
+    self.ContentArea.BorderSizePixel = 0
+    self.ContentArea.Parent = self.MainFrame
+
+    self.Tabs = {}
+    return self
+end
+
+function DarkNessLibrary:CreateTab(name, iconText)
+    local self = self
+    
+    local TabBtn = Instance.new("TextButton")
+    TabBtn.Size = UDim2.new(1, 0, 0, 36)
+    TabBtn.BackgroundColor3 = Color3.fromRGB(22, 22, 30)
+    TabBtn.BorderSizePixel = 0
+    TabBtn.Text = "  " .. iconText .. "  " .. name
+    TabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
+    TabBtn.TextSize = 12
+    TabBtn.Font = Enum.Font.GothamSemibold
+    TabBtn.TextXAlignment = Enum.TextXAlignment.Left
+    TabBtn.Parent = self.TabListFrame
+
+    local TabCorner = Instance.new("UICorner")
+    TabCorner.CornerRadius = UDim.new(0, 6)
+    TabCorner.Parent = TabBtn
+
+    local TabContainer = Instance.new("ScrollingFrame")
+    TabContainer.Size = UDim2.new(1, 0, 1, 0)
+    TabContainer.BackgroundTransparency = 1
+    TabContainer.BorderSizePixel = 0
+    TabContainer.Visible = false
+    TabContainer.CanvasSize = UDim2.new(0, 0, 0, 0)
+    TabContainer.ScrollBarThickness = 4
+    TabContainer.Parent = self.ContentArea
+
+    local ContainerLayout = Instance.new("UIListLayout")
+    ContainerLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    ContainerLayout.Padding = UDim.new(0, 8)
+    ContainerLayout.Parent = TabContainer
+
+    ContainerLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+        TabContainer.CanvasSize = UDim2.new(0, 0, 0, ContainerLayout.AbsoluteContentSize.Y + 20)
+    end)
+
+    TabBtn.MouseButton1Click:Connect(function()
+        for _, tab in pairs(self.Tabs) do
+            tab.Container.Visible = false
+            tab.Button.BackgroundColor3 = Color3.fromRGB(22, 22, 30)
+            tab.Button.TextColor3 = Color3.fromRGB(180, 180, 180)
+        end
+        TabContainer.Visible = true
+        TabBtn.BackgroundColor3 = ElementGrayHover
+        TabBtn.TextColor3 = NeonAqua
+    end)
+
+    if #self.Tabs == 0 then
+        TabContainer.Visible = true
+        TabBtn.BackgroundColor3 = ElementGrayHover
+        TabBtn.TextColor3 = NeonAqua
+    end
+
+    table.insert(self.Tabs, { Container = TabContainer, Button = TabBtn })
+    self.TabListFrame.CanvasSize = UDim2.new(0, 0, 0, self.TabLayout.AbsoluteContentSize.Y + 20)
+
+    return TabContainer
+end
+
+function DarkNessLibrary:AddToggle(parentTab, nameText, callback)
+    local ToggleBtn = Instance.new("TextButton")
+    ToggleBtn.Size = UDim2.new(1, -10, 0, 36)
+    ToggleBtn.BackgroundColor3 = ElementGray
+    ToggleBtn.BorderSizePixel = 0
+    ToggleBtn.Text = "  " .. nameText .. ": [OFF]"
+    ToggleBtn.TextColor3 = TextGray
+    ToggleBtn.TextSize = 12
+    ToggleBtn.Font = Enum.Font.GothamBold
+    ToggleBtn.TextXAlignment = Enum.TextXAlignment.Left
+    ToggleBtn.Parent = parentTab
+
+    local Corner = Instance.new("UICorner")
+    Corner.CornerRadius = UDim.new(0, 6)
+    Corner.Parent = ToggleBtn
+
+    local state = false
+    ToggleBtn.MouseButton1Click:Connect(function()
+        state = not state
+        if state then
+            ToggleBtn.Text = "  " .. nameText .. ": [ON]"
+            ToggleBtn.TextColor3 = NeonAqua
+            ToggleBtn.BackgroundColor3 = ElementGrayHover
+        else
+            ToggleBtn.Text = "  " .. nameText .. ": [OFF]"
+            ToggleBtn.TextColor3 = TextGray
+            ToggleBtn.BackgroundColor3 = ElementGray
+        end
+        if callback then callback(state) end
+    end)
+end
+
+function DarkNessLibrary:SendNotification(text)
+    local Notif = Instance.new("Frame")
+    Notif.Size = UDim2.new(0, 300, 0, 45)
+    Notif.Position = UDim2.new(1, -320, 0, 20)
+    Notif.BackgroundColor3 = HeaderGray
+    Notif.BorderSizePixel = 0
+    Notif.Parent = self.ScreenGui
+
+    local NotifStroke = Instance.new("UIStroke")
+    NotifStroke.Color = NeonAqua
+    NotifStroke.Thickness = 1.2
+    NotifStroke.Parent = Notif
+
+    local NotifCorner = Instance.new("UICorner")
+    NotifCorner.CornerRadius = UDim.new(0, 6)
+    NotifCorner.Parent = Notif
+
+    local NotifText = Instance.new("TextLabel")
+    NotifText.Size = UDim2.new(1, 0, 1, 0)
+    NotifText.BackgroundTransparency = 1
+    NotifText.Text = text
+    NotifText.TextColor3 = NeonAqua
+    NotifText.TextSize = 13
+    NotifText.Font = Enum.Font.GothamBold
+    NotifText.Parent = Notif
+
+    task.spawn(function()
+        task.wait(3.5)
+        for i = 0, 1, 0.1 do
+            Notif.BackgroundTransparency = i
+            NotifText.TextTransparency = i
+            NotifStroke.Transparency = i
+            task.wait(0.03)
+        end
+        Notif:Destroy()
+    end)
+end
+
+-- Menüyü Açıp Kapanan Toggle Tuşu + Lock Tuşu
+function DarkNessLibrary:CreateExternalShortcuts(menuFrame, lockCallback)
+    local ShortcutHolder = Instance.new("Frame")
+    ShortcutHolder.Name = "ExternalShortcuts"
+    ShortcutHolder.Size = UDim2.new(0, 160, 0, 90)
+    ShortcutHolder.Position = UDim2.new(1, -175, 0.5, -45)
+    ShortcutHolder.BackgroundColor3 = DarkObsidian
+    ShortcutHolder.BorderSizePixel = 0
+    ShortcutHolder.Parent = self.ScreenGui
+
+    local HolderStroke = Instance.new("UIStroke")
+    HolderStroke.Color = NeonAqua
+    HolderStroke.Thickness = 1.5
+    HolderStroke.Parent = ShortcutHolder
+
+    local HolderCorner = Instance.new("UICorner")
+    HolderCorner.CornerRadius = UDim.new(0, 6)
+    HolderCorner.Parent = ShortcutHolder
+
+    -- Menü Açma / Kapama Tuşu (Toggle Menu - VISIBLE/HIDDEN)
+    local MenuToggleBtn = Instance.new("TextButton")
+    MenuToggleBtn.Size = UDim2.new(1, -16, 0, 32)
+    MenuToggleBtn.Position = UDim2.new(0, 8, 0, 10)
+    MenuToggleBtn.BackgroundColor3 = ElementGrayHover
+    MenuToggleBtn.Text = "Menu: VISIBLE"
+    MenuToggleBtn.TextColor3 = NeonAqua
+    MenuToggleBtn.TextSize = 11
+    MenuToggleBtn.Font = Enum.Font.GothamBold
+    MenuToggleBtn.Parent = ShortcutHolder
+
+    local MTCorner = Instance.new("UICorner")
+    MTCorner.CornerRadius = UDim.new(0, 4)
+    MTCorner.Parent = MenuToggleBtn
+
+    -- 2. Dış Lock Tuşu
+    local ExtLockBtn = Instance.new("TextButton")
+    ExtLockBtn.Size = UDim2.new(1, -16, 0, 32)
+    ExtLockBtn.Position = UDim2.new(0, 8, 0, 48)
+    ExtLockBtn.BackgroundColor3 = ElementGray
+    ExtLockBtn.Text = "Lock: UNLOCKED"
+    ExtLockBtn.TextColor3 = TextGray
+    ExtLockBtn.TextSize = 11
+    ExtLockBtn.Font = Enum.Font.GothamBold
+    ExtLockBtn.Parent = ShortcutHolder
+
+    local ELCorner = Instance.new("UICorner")
+    ELCorner.CornerRadius = UDim.new(0, 4)
+    ELCorner.Parent = ExtLockBtn
+
+    local menuVisible = true
+    local isLocked = false
+
+    MenuToggleBtn.MouseButton1Click:Connect(function()
+        menuVisible = not menuVisible
+        menuFrame.Visible = menuVisible
+        if menuVisible then
+            MenuToggleBtn.Text = "Menu: VISIBLE"
+            MenuToggleBtn.TextColor3 = NeonAqua
+            MenuToggleBtn.BackgroundColor3 = ElementGrayHover
+        else
+            MenuToggleBtn.Text = "Menu: HIDDEN"
+            MenuToggleBtn.TextColor3 = TextGray
+            MenuToggleBtn.BackgroundColor3 = ElementGray
+        end
+    end)
+
+    ExtLockBtn.MouseButton1Click:Connect(function()
+        isLocked = not isLocked
+        if isLocked then
+            ExtLockBtn.Text = "Lock: KİLİTLİ 🔒"
+            ExtLockBtn.TextColor3 = NeonAqua
+            ExtLockBtn.BackgroundColor3 = ElementGrayHover
+        else
+            ExtLockBtn.Text = "Lock: SERBEST 🔓"
+            ExtLockBtn.TextColor3 = TextGray
+            ExtLockBtn.BackgroundColor3 = ElementGray
+        end
+        if lockCallback then lockCallback(isLocked) end
+    end)
+end
+
+-- ==========================================
+-- ÇALIŞTIRMA & SEKMELERİN OLUŞTURULMASI
+-- ==========================================
+
+local SaturnWindow = DarkNessLibrary.new("Saturn Hub | TSB Edition")
+
+-- Bildirim
+SaturnWindow:SendNotification("Saturn Hub Aktifleştirildi! [Undetected] 🛡️")
+
+-- Sekmeler
+local PlayerTab   = SaturnWindow:CreateTab("Player", "👤")
+local VisualsTab  = SaturnWindow:CreateTab("Visuals", "👁️")
+local MacroTab    = SaturnWindow:CreateTab("Macro", "⚡")
+local TrollTab    = SaturnWindow:CreateTab("Troll", "🎭")
+local SettingTab  = SaturnWindow:CreateTab("Setting", "⚙️")
+local ExploitsTab = SaturnWindow:CreateTab("Exploits", "🔥")
+
+-- ==========================================
+-- VISUALS KISMI (Neon Aqua ESP Suite)
+-- ==========================================
+
+-- Healt ESP (Dinamik Renk Tarayıcı)
+SaturnWindow:AddToggle(VisualsTab, "Health ESP (Yeşil-Siyah)", function(state)
+    print("[ESP] Health ESP Durumu:", state)
+    -- Can tarayıcı mantığı buraya bağlanacak (Full=Yeşil, Az=Turuncu, Kritik=Kırmızı, Ölü=Siyah)
+end)
+
+-- Players ESP (Beyaz Highlight, Aqua İç)
+SaturnWindow:AddToggle(VisualsTab, "Players ESP (Highlights - Aqua İç)", function(state)
+    print("[ESP] Players ESP Durumu:", state)
+    -- Düşmanları Highlights (Beyaz Çerçeve, Aqua Parlama) mantığı
+end)
+
+-- Players Tracer (Aqua Çizgi)
+SaturnWindow:AddToggle(VisualsTab, "Players Tracer (Aqua Çizgi)", function(state)
+    print("[ESP] Players Tracer Durumu:", state)
+    -- Tüm oyunculara Aqua çizgiler çekme mantığı
+end)
+
+-- Hitbox ESP (Aqua Kutu)
+SaturnWindow:AddToggle(VisualsTab, "Hitbox ESP (Players - Aqua Kutu)", function(state)
+    print("[ESP] Hitbox ESP Durumu:", state)
+    -- Oyuncuları Aqua kutularla sarma mantığı
+end)
+
+-- ==========================================
+-- TROLL SEKMESİ İÇERİĞİ
+-- ==========================================
+SaturnWindow:AddToggle(TrollTab, "Fling Aura / Spin Troll", function(state)
+    print("[Troll] Spin Troll Durumu:", state)
+end)
+
+SaturnWindow:AddToggle(TrollTab, "Fake Lag / Sound Spam", function(state)
+    print("[Troll] Fake Lag Durumu:", state)
+end)
+
+-- ==========================================
+-- DIŞ KISAYOL TUŞLARI
+-- ==========================================
+-- Dış Toggle tuşu artık menüyü kapatıp açar
+SaturnWindow:CreateExternalShortcuts(SaturnWindow.MainFrame, function(lockState)
+    print("[SaturnHub] Hedef Lock Durumu:", lockState)
+end)
+
+print("[SaturnHub] Genişletilmiş TSB Sürümü başarıyla yüklendi kanka!")
