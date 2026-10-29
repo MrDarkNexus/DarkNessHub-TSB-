@@ -1,6 +1,6 @@
 -- Pearl×Neøn Studio | DarkNess Library Extended Build
 -- Theme: Neon Aqua & Dark Obsidian | Saturn Hub Edition
--- Updated: Draggable Menu, Extra Wide Layout, Advanced Neon Aqua ESP Suite
+-- Updated: Draggable Menu, Extra Wide Layout, Advanced Neon Aqua Highlight ESP Suite
 
 local DarkNessLibrary = {}
 DarkNessLibrary.__index = DarkNessLibrary
@@ -37,10 +37,10 @@ function DarkNessLibrary.new(titleText)
     self.ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
     protect(self.ScreenGui)
 
-    -- Menü Boyutları Daha Da Genişletildi (İstek üzerine)
+    -- Menü Boyutları Genişletildi
     self.MainFrame = Instance.new("Frame")
     self.MainFrame.Name = "MainFrame"
-    self.MainFrame.Size = UDim2.new(0, 720, 0, 480) -- Daha geniş Doğu-Batı ve Boy
+    self.MainFrame.Size = UDim2.new(0, 720, 0, 480)
     self.MainFrame.Position = UDim2.new(0.5, -360, 0.5, -240)
     self.MainFrame.BackgroundColor3 = DarkObsidian
     self.MainFrame.BorderSizePixel = 0
@@ -55,7 +55,7 @@ function DarkNessLibrary.new(titleText)
     self.Corner.CornerRadius = UDim.new(0, 8)
     self.Corner.Parent = self.MainFrame
 
-    -- Başlık Barı (Undetected ibaresi ve Draggable)
+    -- Başlık Barı (Draggable)
     self.Header = Instance.new("TextLabel")
     self.Header.Size = UDim2.new(1, 0, 0, 45)
     self.Header.BackgroundColor3 = HeaderGray
@@ -263,7 +263,6 @@ function DarkNessLibrary:SendNotification(text)
     end)
 end
 
--- Menüyü Açıp Kapanan Toggle Tuşu + Lock Tuşu
 function DarkNessLibrary:CreateExternalShortcuts(menuFrame, lockCallback)
     local ShortcutHolder = Instance.new("Frame")
     ShortcutHolder.Name = "ExternalShortcuts"
@@ -282,7 +281,6 @@ function DarkNessLibrary:CreateExternalShortcuts(menuFrame, lockCallback)
     HolderCorner.CornerRadius = UDim.new(0, 6)
     HolderCorner.Parent = ShortcutHolder
 
-    -- Menü Açma / Kapama Tuşu (Toggle Menu - VISIBLE/HIDDEN)
     local MenuToggleBtn = Instance.new("TextButton")
     MenuToggleBtn.Size = UDim2.new(1, -16, 0, 32)
     MenuToggleBtn.Position = UDim2.new(0, 8, 0, 10)
@@ -297,7 +295,6 @@ function DarkNessLibrary:CreateExternalShortcuts(menuFrame, lockCallback)
     MTCorner.CornerRadius = UDim.new(0, 4)
     MTCorner.Parent = MenuToggleBtn
 
-    -- 2. Dış Lock Tuşu
     local ExtLockBtn = Instance.new("TextButton")
     ExtLockBtn.Size = UDim2.new(1, -16, 0, 32)
     ExtLockBtn.Position = UDim2.new(0, 8, 0, 48)
@@ -344,16 +341,10 @@ function DarkNessLibrary:CreateExternalShortcuts(menuFrame, lockCallback)
     end)
 end
 
--- ==========================================
--- ÇALIŞTIRMA & SEKMELERİN OLUŞTURULMASI
--- ==========================================
-
 local SaturnWindow = DarkNessLibrary.new("Saturn Hub | TSB Edition")
 
--- Bildirim
 SaturnWindow:SendNotification("Saturn Hub Aktifleştirildi! [Undetected] 🛡️")
 
--- Sekmeler
 local PlayerTab   = SaturnWindow:CreateTab("Player", "👤")
 local VisualsTab  = SaturnWindow:CreateTab("Visuals", "👁️")
 local MacroTab    = SaturnWindow:CreateTab("Macro", "⚡")
@@ -361,37 +352,22 @@ local TrollTab    = SaturnWindow:CreateTab("Troll", "🎭")
 local SettingTab  = SaturnWindow:CreateTab("Setting", "⚙️")
 local ExploitsTab = SaturnWindow:CreateTab("Exploits", "🔥")
 
--- ==========================================
--- VISUALS KISMI (Neon Aqua ESP Suite)
--- ==========================================
-
--- Healt ESP (Dinamik Renk Tarayıcı)
 SaturnWindow:AddToggle(VisualsTab, "Health ESP (Yeşil-Siyah)", function(state)
     print("[ESP] Health ESP Durumu:", state)
-    -- Can tarayıcı mantığı buraya bağlanacak (Full=Yeşil, Az=Turuncu, Kritik=Kırmızı, Ölü=Siyah)
 end)
 
--- Players ESP (Beyaz Highlight, Aqua İç)
 SaturnWindow:AddToggle(VisualsTab, "Players ESP (Highlights - Aqua İç)", function(state)
     print("[ESP] Players ESP Durumu:", state)
-    -- Düşmanları Highlights (Beyaz Çerçeve, Aqua Parlama) mantığı
 end)
 
--- Players Tracer (Aqua Çizgi)
 SaturnWindow:AddToggle(VisualsTab, "Players Tracer (Aqua Çizgi)", function(state)
     print("[ESP] Players Tracer Durumu:", state)
-    -- Tüm oyunculara Aqua çizgiler çekme mantığı
 end)
 
--- Hitbox ESP (Aqua Kutu)
 SaturnWindow:AddToggle(VisualsTab, "Hitbox ESP (Players - Aqua Kutu)", function(state)
     print("[ESP] Hitbox ESP Durumu:", state)
-    -- Oyuncuları Aqua kutularla sarma mantığı
 end)
 
--- ==========================================
--- TROLL SEKMESİ İÇERİĞİ
--- ==========================================
 SaturnWindow:AddToggle(TrollTab, "Fling Aura / Spin Troll", function(state)
     print("[Troll] Spin Troll Durumu:", state)
 end)
@@ -400,12 +376,8 @@ SaturnWindow:AddToggle(TrollTab, "Fake Lag / Sound Spam", function(state)
     print("[Troll] Fake Lag Durumu:", state)
 end)
 
--- ==========================================
--- DIŞ KISAYOL TUŞLARI
--- ==========================================
--- Dış Toggle tuşu artık menüyü kapatıp açar
 SaturnWindow:CreateExternalShortcuts(SaturnWindow.MainFrame, function(lockState)
     print("[SaturnHub] Hedef Lock Durumu:", lockState)
 end)
 
-print("[SaturnHub] Genişletilmiş TSB Sürümü başarıyla yüklendi kanka!")
+print("[SaturnHub] TSB Sürümü başarıyla yüklendi kanka!")
